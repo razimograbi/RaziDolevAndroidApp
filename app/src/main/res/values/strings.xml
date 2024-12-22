@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">GlobalSpeakClient</string>
+    <string name="initiating_call">Initiating call…</string>
+    <string name="hang_up_no_active_call">No active call to hang up.</string>
+</resources>

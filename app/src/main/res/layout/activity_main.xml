@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:gravity="center">
+
+    <EditText
+        android:id="@+id/etCallerId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Caller ID" />
+
+    <EditText
+        android:id="@+id/etReceiverId"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Receiver ID" />
+
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Status"
+        android:layout_marginTop="20dp" />
+
+    <Button
+        android:id="@+id/btnCall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Call"
+        android:layout_marginTop="20dp" />
+
+    <Button
+        android:id="@+id/btnHangUp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hang Up"
+        android:layout_marginTop="20dp" />
+</LinearLayout>
