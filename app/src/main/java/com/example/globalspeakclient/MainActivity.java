@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "VOIPClient";
 
-    private EditText etCallerId, etReceiverId;
+    private EditText etReceiverId;
     private TextView tvStatus;
     private Button btnCall, btnHangUp;
 
@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
     private AtomicBoolean isPlaying = new AtomicBoolean(false);
 
     // call management
-    private String userId;
+    private String userId; // We get it from Intent
     private String otherUserId;
     private String activeCallId; // store the call_id from the server
 
@@ -91,7 +91,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        etCallerId = findViewById(R.id.etCallerId);
+        userId = getIntent().getStringExtra("userId");
+        if (userId == null) {
+            Toast.makeText(this, "No userId found, please go back.", Toast.LENGTH_SHORT).show();
+        }
+
         etReceiverId = findViewById(R.id.etReceiverId);
         tvStatus = findViewById(R.id.tvStatus);
         btnCall = findViewById(R.id.btnCall);
@@ -105,30 +109,21 @@ public class MainActivity extends AppCompatActivity {
         okHttpClient = new OkHttpClient();
 
         // "Call" button for outgoing calls
-        btnCall.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                userId = etCallerId.getText().toString().trim();
-                otherUserId = etReceiverId.getText().toString().trim();
-                if (userId.isEmpty() || otherUserId.isEmpty()) {
-                    Toast.makeText(MainActivity.this,
-                            "Enter both caller and receiver IDs",
-                            Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                // 1) Initiate call (REST) => get call_id
-                // 2) Connect WebSocket => send userId
-                // 3) Wait for call_accepted/call_started => start streaming
-                initiateCall(userId, otherUserId);
+        btnCall.setOnClickListener(view -> {
+            otherUserId = etReceiverId.getText().toString().trim();
+            if (otherUserId.isEmpty()) {
+                Toast.makeText(MainActivity.this,
+                        "Enter a receiver ID",
+                        Toast.LENGTH_SHORT).show();
+                return;
             }
+            // 1) Initiate call (REST) => get call_id
+            // 2) If not already connected, connect WebSocket => send userId
+            // 3) Wait for call_accepted/call_started => start streaming
+            initiateCall(userId, otherUserId);
         });
 
-        btnHangUp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                hangUp();
-            }
-        });
+        btnHangUp.setOnClickListener(view -> hangUp());
     }
 
     /**
@@ -203,6 +198,10 @@ public class MainActivity extends AppCompatActivity {
      *  Connect the WebSocket and identify ourselves with userId.
      */
     private void connectWebSocket(String userId) {
+        if (webSocket != null) {
+            Log.d(TAG, "WebSocket is already connected or connecting.");
+            return;
+        }
         tvStatus.setText("Connecting WebSocket...");
 
         Request request = new Request.Builder().url(WS_URL).build();
