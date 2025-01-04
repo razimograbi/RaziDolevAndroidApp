@@ -4,9 +4,15 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import org.json.JSONException;
@@ -24,9 +30,10 @@ import okhttp3.WebSocketListener;
  */
 public class ConnectActivity extends AppCompatActivity {
     private static final String TAG = "ConnectActivity";
-    private static final String WS_URL = "ws://10.0.2.2:8000/ws";
+    private static final String WS_URL = "ws://10.0.0.15:8000/ws";
 
     private EditText etUserId;
+    private Spinner spinnerLanguages;
     private Button btnConnect;
     private TextView tvStatus;
 
@@ -39,18 +46,43 @@ public class ConnectActivity extends AppCompatActivity {
         setContentView(R.layout.activity_connect);
 
         etUserId = findViewById(R.id.etUserId);
+        spinnerLanguages = findViewById(R.id.spinner_languages);
         btnConnect = findViewById(R.id.btnConnect);
         tvStatus = findViewById(R.id.tvStatus);
 
         okHttpClient = new OkHttpClient();
 
+        // =================== Populate Spinner and add protective listeners ===============================
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+                this, R.array.languages_array, android.R.layout.simple_spinner_item
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerLanguages.setAdapter(adapter);
+
+        // Watch for changes
+        etUserId.addTextChangedListener(textWatcher);
+        spinnerLanguages.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(
+                    AdapterView<?> parent, View view, int position, long id
+            ) {
+                checkFormValid();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) { }
+        });
+
         btnConnect.setOnClickListener(view -> {
             String userId = etUserId.getText().toString().trim();
+            String language = spinnerLanguages.getSelectedItem().toString();
             if (userId.isEmpty()) {
                 tvStatus.setText("Please enter a userId.");
                 return;
             }
-            tvStatus.setText("Connecting to server...");
+            tvStatus.setText("connecting as " + userId + " with language " + language + "...");
+            tvStatus.setVisibility(View.VISIBLE);
             connectWebSocket(userId);
         });
     }
@@ -99,4 +131,29 @@ public class ConnectActivity extends AppCompatActivity {
             }
         });
     }
+
+
+    // Enable the button only if both User ID and language are selected
+    private TextWatcher textWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            checkFormValid();
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) { }
+    };
+
+    private void checkFormValid() {
+        String userIdText = etUserId.getText().toString().trim();
+        // Check if user entered something and selected a non-default language
+        boolean isUserIdNotEmpty = !userIdText.isEmpty();
+        boolean isLanguageSelected = spinnerLanguages.getSelectedItemPosition() != AdapterView.INVALID_POSITION;
+        btnConnect.setEnabled(isUserIdNotEmpty && isLanguageSelected);
+    }
 }
+
+
