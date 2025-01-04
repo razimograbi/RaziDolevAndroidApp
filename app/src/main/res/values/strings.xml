@@ -2,4 +2,10 @@
     <string name="app_name">GlobalSpeakClient</string>
     <string name="initiating_call">Initiating call…</string>
     <string name="hang_up_no_active_call">No active call to hang up.</string>
+    <string name="language_prompt">Select a language</string>
+    <string-array name="languages_array">
+        <item>English</item>
+        <item>Arabic</item>
+        <item>Hebrew</item>
+    </string-array>
 </resources>

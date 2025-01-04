@@ -1,6 +1,10 @@
 package com.example.globalspeakclient;
 
+import android.content.Context;
 import android.content.DialogInterface;
+import android.media.audiofx.AcousticEchoCanceler;
+import android.media.audiofx.AutomaticGainControl;
+import android.media.audiofx.NoiseSuppressor;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -82,8 +86,8 @@ public class MainActivity extends AppCompatActivity {
     // ================= We must be careful when selecting these ==============================
     // The server IP: for emulator, 10.0.2.2
     // The server is listening on port 8000
-    private static final String BASE_URL = "http://10.0.2.2:8000";
-    private static final String WS_URL = "ws://10.0.2.2:8000/ws";
+    private static final String BASE_URL = "http://10.0.0.15:8000";
+    private static final String WS_URL = "ws://10.0.0.15:8000/ws";
 
     // ========================================================================================
 
@@ -226,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onMessage(WebSocket webSocket, String text) {
                 Log.d(TAG, "onMessage: " + text);
-                // Usually JSON: could be call_accepted, call_started, call_rejected, etc.
+                // JSON: could be call_accepted, call_started, call_rejected, etc.
                 handleJsonMessage(text);
             }
 
@@ -533,6 +537,7 @@ public class MainActivity extends AppCompatActivity {
             finish();
             return false;
         }
+        Log.d(TAG, "This is the buffer Sizeee :  " + String.valueOf(minRecBufferSize));
 
         audioRecord = new AudioRecord(
                 MediaRecorder.AudioSource.MIC,
@@ -567,6 +572,53 @@ public class MainActivity extends AppCompatActivity {
             finish();
             return false;
         }
+
+        // ===========================
+        // 5) Lets setup a  ECHO CANCELLATION / NOISE SUPPRESSION in order not to hear echo
+        // ===========================
+
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        if (audioManager != null) {
+            audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+        }
+
+        // Lets : Enable AcousticEchoCanceler if available
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
+            if (AcousticEchoCanceler.isAvailable()) {
+                AcousticEchoCanceler aec =
+                        AcousticEchoCanceler.create(audioRecord.getAudioSessionId());
+                if (aec != null) {
+                    aec.setEnabled(true);
+                    Log.d(TAG, "Acoustic Echo Canceler enabled!!");
+                }
+            }
+            // also  NoiseSuppressor
+            if (NoiseSuppressor.isAvailable()) {
+                NoiseSuppressor ns =
+                        NoiseSuppressor.create(audioRecord.getAudioSessionId());
+                if (ns != null) {
+                    ns.setEnabled(true);
+                    Log.d(TAG, "NoiseSuppressor enabled!! woooow");
+                }
+            }
+
+            // I found this on the internet : AutomaticGainControl
+            // I think it normalizes the clients voice( so when it's high it lowes it and vese versa)
+
+            if (AutomaticGainControl.isAvailable()) {
+                AutomaticGainControl agc =
+                        AutomaticGainControl.create(audioRecord.getAudioSessionId());
+                if (agc != null) {
+                    agc.setEnabled(true);
+                    Log.d(TAG, "AutomaticGainControl enabled");
+                }
+            }
+
+
+        }
+
+
+
         Toast.makeText(this, "Audio Init successfully ", Toast.LENGTH_SHORT).show();
         return true;
     }
