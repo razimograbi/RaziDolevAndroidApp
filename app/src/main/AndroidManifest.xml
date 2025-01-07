@@ -1,10 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.globalspeakclient">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:allowBackup="true"
@@ -18,7 +17,7 @@
         android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="31">
 
-        <!-- Make LoginActivity the launcher activity -->
+        <!-- LoginActivity (Launcher Activity) -->
         <activity
             android:name=".LoginActivity"
             android:exported="true">
@@ -28,10 +27,20 @@
             </intent-filter>
         </activity>
 
+        <!-- SignUpActivity -->
+        <activity
+            android:name=".SignUpActivity"
+            android:exported="false" />
+
+        <!-- AudioRecordingActivity -->
+        <activity
+            android:name=".AudioRecordingActivity"
+            android:exported="false" />
+
         <!-- ConnectActivity -->
         <activity
             android:name=".ConnectActivity"
-            android:exported="true" />
+            android:exported="false" />
 
         <!-- MainActivity -->
         <activity

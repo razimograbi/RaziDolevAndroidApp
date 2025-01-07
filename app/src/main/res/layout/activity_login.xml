@@ -14,7 +14,7 @@
         android:id="@+id/tvWelcome"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Welcome to Global Communication"
+        android:text="@string/welcome_message"
         android:textSize="26sp"
         android:textStyle="bold"
         android:textColor="@color/black"
@@ -26,7 +26,6 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Username"
         app:boxBackgroundMode="outline"
         app:boxStrokeColor="@color/teal_700"
         app:hintTextColor="@color/teal_700"
@@ -36,14 +35,15 @@
             android:id="@+id/etUsername"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text" />
+            android:hint="@string/hint_email_example"
+            android:inputType="textEmailAddress" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Password Input -->
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Password"
+        android:hint="@string/hint_password"
         app:boxBackgroundMode="outline"
         app:boxStrokeColor="@color/teal_700"
         app:hintTextColor="@color/teal_700"
@@ -61,7 +61,7 @@
         android:id="@+id/btnLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Log In"
+        android:text="@string/login_button_text"
         android:textColor="@color/white"
         android:backgroundTint="@color/purple_500"
         app:cornerRadius="8dp"
@@ -71,10 +71,10 @@
 
     <!-- Register Button -->
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnRegister"
+        android:id="@+id/btnSignup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Sign Up"
+        android:text="@string/signup_button_text"
         android:textColor="@color/teal_700"
         android:backgroundTint="@color/white"
         app:strokeWidth="1dp"
