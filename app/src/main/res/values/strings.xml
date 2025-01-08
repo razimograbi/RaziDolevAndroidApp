@@ -2,10 +2,79 @@
     <string name="app_name">GlobalSpeakClient</string>
     <string name="initiating_call">Initiating call…</string>
     <string name="hang_up_no_active_call">No active call to hang up.</string>
-    <string name="language_prompt">Select a language</string>
     <string-array name="languages_array">
         <item>English</item>
         <item>Arabic</item>
         <item>Hebrew</item>
     </string-array>
+    <string name="hint_email_example">user@email.com</string>
+    <string name="hint_password">password</string>
+    <string name="welcome_message">Welcome to Global Communication</string>
+    <string name="login_button_text">Log In</string>
+    <string name="signup_button_text">Sign Up</string>
+    <string name="hint_profile_name">Profile Name</string>
+    <string name="hint_confirm_password">Confirm Password</string>
+    <string name="hint_language">Language</string>
+    <string name="continue_button_text">Continue</string>
+    <string-array name="languages">
+        <item>Afrikaans</item>
+        <item>Arabic</item>
+        <item>Armenian</item>
+        <item>Azerbaijani</item>
+        <item>Belarusian</item>
+        <item>Bosnian</item>
+        <item>Bulgarian</item>
+        <item>Catalan</item>
+        <item>Chinese</item>
+        <item>Croatian</item>
+        <item>Czech</item>
+        <item>Danish</item>
+        <item>Dutch</item>
+        <item>English</item>
+        <item>Estonian</item>
+        <item>Finnish</item>
+        <item>French</item>
+        <item>Galician</item>
+        <item>German</item>
+        <item>Greek</item>
+        <item>Hebrew</item>
+        <item>Hindi</item>
+        <item>Hungarian</item>
+        <item>Icelandic</item>
+        <item>Indonesian</item>
+        <item>Italian</item>
+        <item>Japanese</item>
+        <item>Kannada</item>
+        <item>Kazakh</item>
+        <item>Korean</item>
+        <item>Latvian</item>
+        <item>Lithuanian</item>
+        <item>Macedonian</item>
+        <item>Malay</item>
+        <item>Marathi</item>
+        <item>Maori</item>
+        <item>Nepali</item>
+        <item>Norwegian</item>
+        <item>Persian</item>
+        <item>Polish</item>
+        <item>Portuguese</item>
+        <item>Romanian</item>
+        <item>Russian</item>
+        <item>Serbian</item>
+        <item>Slovak</item>
+        <item>Slovenian</item>
+        <item>Spanish</item>
+        <item>Swahili</item>
+        <item>Swedish</item>
+        <item>Tagalog</item>
+        <item>Tamil</item>
+        <item>Thai</item>
+        <item>Turkish</item>
+        <item>Ukrainian</item>
+        <item>Urdu</item>
+        <item>Vietnamese</item>
+        <item>Welsh</item>
+    </string-array>
+
+
 </resources>
