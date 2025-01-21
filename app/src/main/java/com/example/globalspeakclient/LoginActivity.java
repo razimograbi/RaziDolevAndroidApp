@@ -12,10 +12,22 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+
+
+/**
+ * Handles the user login process.
+ *
+ * This activity allows users to:
+ * - Enter their email and password to sign in.
+ * - Navigate to the sign-up screen if they do not have an account.
+ * - Automatically log in if the user is already signed in (unless testing).
+ *
+ * Calls `AuthenticationService` to authenticate users with Firebase.
+ */
 public class LoginActivity extends AppCompatActivity {
 
     private static final String TAG = "LoginActivity";
-    private AuthHelper authHelper;
+    private AuthenticationService authenticationService;
     private EditText etUsername, etPassword;
     private Button btnLogin, btnSignUp;
 
@@ -40,7 +52,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void initializeUI() {
-        authHelper = new AuthHelper();
+        authenticationService = new AuthenticationService();
         etUsername = findViewById(R.id.etUsername);
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
@@ -57,7 +69,7 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
-            authHelper.signIn(email, password, new AuthHelper.OnAuthResultListener() {
+            authenticationService.signIn(email, password, new AuthenticationService.OnAuthResultListener() {
                 @Override
                 public void onSuccess(FirebaseUser user) {
                     handleSuccessfulLogin(user);
