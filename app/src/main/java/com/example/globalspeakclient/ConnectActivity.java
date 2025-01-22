@@ -30,7 +30,7 @@ import okhttp3.WebSocketListener;
  */
 public class ConnectActivity extends AppCompatActivity {
     private static final String TAG = "ConnectActivity";
-    private static final String WS_URL = "ws://10.0.0.15:8000/ws";
+    private static final String WS_URL = "ws://10.0.0.16:8000/ws";
 
     private EditText etUserId;
     private Spinner spinnerLanguages;
@@ -83,11 +83,11 @@ public class ConnectActivity extends AppCompatActivity {
             }
             tvStatus.setText("connecting as " + userId + " with language " + language + "...");
             tvStatus.setVisibility(View.VISIBLE);
-            connectWebSocket(userId);
+            connectWebSocket(userId, language);
         });
     }
 
-    private void connectWebSocket(String userId) {
+    private void connectWebSocket(String userId, String language) {
         Request request = new Request.Builder().url(WS_URL).build();
         webSocket = okHttpClient.newWebSocket(request, new WebSocketListener() {
             @Override
@@ -99,6 +99,7 @@ public class ConnectActivity extends AppCompatActivity {
                 try {
                     JSONObject initMsg = new JSONObject();
                     initMsg.put("user_id", userId);
+                    initMsg.put("language", language);
                     webSocket.send(initMsg.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -108,6 +109,7 @@ public class ConnectActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     Intent intent = new Intent(ConnectActivity.this, MainActivity.class);
                     intent.putExtra("userId", userId);
+                    intent.putExtra("language", language);
                     startActivity(intent);
                     finish();
                 });

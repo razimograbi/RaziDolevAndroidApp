@@ -7,7 +7,9 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,10 +38,11 @@ public class AudioRecordingActivity extends AppCompatActivity {
 
     private static final int RECORDING_DURATION_MS = 8000; // 8 seconds
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
-    private static final String BASE_URL = "http://10.0.0.15:8000";
+    private static final String BASE_URL = "http://10.0.0.16:8000";
 
     private TextView tvInstructions, tvTextToRead, tvTimer;
     private Button btnRecord, btnPlayRecording, btnSubmitRecording;
+    private ProgressBar loadingProgressBar;
     private WavRecorder wavRecorder;
     private MediaPlayer mediaPlayer;
     private boolean isRecording = false;
@@ -65,6 +68,8 @@ public class AudioRecordingActivity extends AppCompatActivity {
         profileName = getIntent().getStringExtra("profileName");
         password = getIntent().getStringExtra("password");
         language = getIntent().getStringExtra("language");
+
+        loadingProgressBar = findViewById(R.id.loadingProgressBar);
 
         initializeUI();
 
@@ -232,10 +237,13 @@ public class AudioRecordingActivity extends AppCompatActivity {
             return;
         }
 
+        runOnUiThread(() -> loadingProgressBar.setVisibility(View.VISIBLE));
+
         // Send audio file to the server and wait for embedding
         new Thread(() -> {
             String embeddingVector = sendAudioAndGetEmbedding(audioFile);
             runOnUiThread(() -> {
+                loadingProgressBar.setVisibility(View.GONE); // Hide the ProgressBar
                 if (embeddingVector != null) {
                     User user = new User(email, password, profileName, language);
                     authenticationService.signUpWithEmbedding(user, embeddingVector, new AuthenticationService.OnAuthResultListener() {

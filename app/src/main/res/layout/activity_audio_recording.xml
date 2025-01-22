@@ -128,5 +128,14 @@
         android:elevation="4dp"
         app:rippleColor="@color/teal_200" />
 
+    <ProgressBar
+        android:id="@+id/loadingProgressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        android:indeterminate="true" />
+
 
 </RelativeLayout>
