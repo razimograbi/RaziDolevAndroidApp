@@ -75,6 +75,21 @@
         <item>Vietnamese</item>
         <item>Welsh</item>
     </string-array>
+    <string name="audio_recording_instructions">
+    For the voice cloning procedure, please read the following passage aloud. Speak clearly and naturally. When ready, press "Start Recording." The recording will stop automatically after 8 seconds.
+</string>
+    <string name="audio_text_to_read">
+    "Clear communication is the foundation of strong relationships. Every word we speak has the power to inspire, inform, and connect us to one another. Take a deep breath, speak slowly, and let your voice carry your message with clarity and confidence."
+</string>
+    <string name="start_recording">Start Recording</string>
+    <string name="play_recording">Play Recording</string>
+    <string name="submit_recording">Submit </string>
+    <string name="recording_started">Recording started…</string>
+    <string name="recording_stopped">Recording stopped.</string>
+    <string name="recording_playing">Playing recording…</string>
+    <string name="permission_denied">Permission denied!</string>
+    <string name="permission_granted">Permission granted!</string>
+    <string name="voice_recording_title">Voice Recording</string>
 
 
 </resources>

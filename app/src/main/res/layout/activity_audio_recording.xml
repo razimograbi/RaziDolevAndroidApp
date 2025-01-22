@@ -1,26 +1,132 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:gravity="center">
+    android:background="@drawable/gradient_background"
+    android:paddingTop="24dp"
+    android:paddingBottom="32dp">
 
-    <!-- Simulate Audio Recording Button -->
-    <Button
-        android:id="@+id/btnSimulateAudio"
+    <!-- Title -->
+    <TextView
+        android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Simulate Audio Recording"
-        android:layout_marginBottom="16dp" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="24dp"
+        android:text="@string/voice_recording_title"
+        android:textColor="@color/black"
+        android:textSize="20sp"
+        android:textStyle="bold" />
 
-    <!-- Complete Sign-Up Button -->
-    <Button
-        android:id="@+id/btnCompleteSignUp"
+    <!-- Instructions -->
+    <TextView
+        android:id="@+id/tvInstructions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/audio_recording_instructions"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:layout_below="@id/tvTitle"
+        android:layout_marginTop="60dp"
+        android:layout_marginHorizontal="16dp"
+        android:textColor="@color/black" />
+
+    <!-- Text Container -->
+    <LinearLayout
+        android:id="@+id/textContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvInstructions"
+        android:layout_marginTop="30dp"
+        android:padding="16dp"
+        android:layout_marginHorizontal="24dp"
+        android:background="@drawable/box_background">
+
+        <TextView
+            android:id="@+id/tvTextToRead"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/audio_text_to_read"
+            android:textSize="16sp"
+            android:gravity="center"
+            android:textColor="@color/black" />
+    </LinearLayout>
+
+    <!-- Timer -->
+    <TextView
+        android:id="@+id/tvTimer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Complete Sign-Up" />
+        android:text="00:00"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_below="@id/textContainer"
+        android:layout_marginTop="32dp"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/black" />
 
-</LinearLayout>
+    <!-- Recording and Play Buttons Container -->
+    <LinearLayout
+        style="?android:attr/buttonBarStyle"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvTimer"
+        android:gravity="center_horizontal"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="32dp">
 
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRecord"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/start_recording"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/purple_500"
+            app:cornerRadius="8dp"
+            android:elevation="4dp"
+            app:rippleColor="@color/teal_200"
+            android:layout_marginBottom="16dp" />
+
+
+
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPlayRecording"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/play_recording"
+            android:textColor="@color/teal_700"
+            android:backgroundTint="@color/white"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/teal_200"
+            app:cornerRadius="8dp"
+            android:elevation="4dp"
+            app:rippleColor="@color/teal_200"
+            android:layout_marginBottom="16dp" />
+
+
+    </LinearLayout>
+
+    <!-- Submit Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSubmitRecording"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/submit_recording"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/purple_500"
+        app:cornerRadius="8dp"
+        android:elevation="4dp"
+        app:rippleColor="@color/teal_200" />
+
+
+</RelativeLayout>
