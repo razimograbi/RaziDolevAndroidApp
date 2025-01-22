@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
     private WebSocket webSocket;
 
     // Audio
-    private static final int SAMPLE_RATE = 16000;
+    private static final int SAMPLE_RATE = 16000; // Todo : This must be changed to 24KH and must test it.
     private static final int CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
     private static final int AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
     private AudioRecord audioRecord;
@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
 
     // call management
     private String userId; // We get it from Intent
+    private String language; // We get it from Intent
     private String otherUserId;
     private String activeCallId; // store the call_id from the server
 
@@ -86,8 +87,8 @@ public class MainActivity extends AppCompatActivity {
     // ================= We must be careful when selecting these ==============================
     // The server IP: for emulator, 10.0.2.2
     // The server is listening on port 8000
-    private static final String BASE_URL = "http://10.0.0.15:8000";
-    private static final String WS_URL = "ws://10.0.0.15:8000/ws";
+    private static final String BASE_URL = "http://10.0.0.16:8000";
+    private static final String WS_URL = "ws://10.0.0.16:8000/ws";
 
     // ========================================================================================
 
@@ -96,8 +97,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         userId = getIntent().getStringExtra("userId");
+        language = getIntent().getStringExtra("language");
         if (userId == null) {
             Toast.makeText(this, "No userId found, please go back.", Toast.LENGTH_SHORT).show();
+        }
+        if(language == null){
+            Toast.makeText(this, "No language found, please go back.", Toast.LENGTH_SHORT).show();
         }
 
         etReceiverId = findViewById(R.id.etReceiverId);
@@ -124,10 +129,14 @@ public class MainActivity extends AppCompatActivity {
             // 1) Initiate call (REST) => get call_id
             // 2) If not already connected, connect WebSocket => send userId
             // 3) Wait for call_accepted/call_started => start streaming
-            initiateCall(userId, otherUserId);
+            initiateCall(userId, language, otherUserId);
         });
 
         btnHangUp.setOnClickListener(view -> hangUp());
+
+        if(webSocket == null){
+            connectWebSocket(userId, language);
+        }
     }
 
     /**
@@ -135,11 +144,11 @@ public class MainActivity extends AppCompatActivity {
      * 2) If successful, we parse JSON to get call_id
      * 3) Connect WebSocket
      */
-    private void initiateCall(String callerId, String receiverId) {
+    private void initiateCall(String callerId, String caller_language, String receiverId) {
         tvStatus.setText(getString(R.string.initiating_call));
 
         if (webSocket == null) {
-            connectWebSocket(callerId);
+            connectWebSocket(callerId, caller_language);
         }
 
         // Use ExecutorService to perform the task in a background thread
@@ -189,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
                     activeCallId = finalCallId;
                     tvStatus.setText("Call initiated. call_id=" + finalCallId);
                     // Connect WebSocket now
-                    connectWebSocket(userId);
+                    connectWebSocket(userId, language);
                 } else {
                     tvStatus.setText("Error: " + finalErrorMessage);
                 }
@@ -201,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      *  Connect the WebSocket and identify ourselves with userId.
      */
-    private void connectWebSocket(String userId) {
+    private void connectWebSocket(String userId, String language) {
         if (webSocket != null) {
             Log.d(TAG, "WebSocket is already connected or connecting.");
             return;
@@ -221,6 +230,7 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     JSONObject initMsg = new JSONObject();
                     initMsg.put("user_id", userId);
+                    initMsg.put("language", language);
                     webSocket.send(initMsg.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -273,7 +283,7 @@ public class MainActivity extends AppCompatActivity {
                     case "incoming_call":
                         // e.g. { "type":"incoming_call", "call_id":"...", "from":"someUser" }
                         String incomingCallId = json.optString("call_id", null);
-                        String fromUser       = json.optString("from", "unknown");
+                        String fromUser = json.optString("from", "unknown");
                         if (incomingCallId != null) {
                             runOnUiThread(() -> showIncomingCallDialog(incomingCallId, fromUser));
                         }
@@ -293,7 +303,7 @@ public class MainActivity extends AppCompatActivity {
                             tvStatus.setText("Call Rejected");
                         });
                         stopAudioStreaming();
-                        closeWebSocket();
+                        // closeWebSocket();
                         break;
 
                     case "call_ended":
@@ -302,7 +312,7 @@ public class MainActivity extends AppCompatActivity {
                             tvStatus.setText("Call Ended by " + endedBy);
                         });
                         stopAudioStreaming();
-                        closeWebSocket();
+                        // closeWebSocket();
                         break;
 
                     default:
@@ -399,7 +409,7 @@ public class MainActivity extends AppCompatActivity {
         if (activeCallId == null || userId == null) {
             tvStatus.setText(getString(R.string.hang_up_no_active_call));
             stopAudioStreaming();
-            closeWebSocket();
+            // closeWebSocket();
             return;
         }
 
@@ -447,7 +457,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // Either way, stop audio and close WebSocket
                 stopAudioStreaming();
-                closeWebSocket();
+                // closeWebSocket();
             });
         });
     }
@@ -463,6 +473,7 @@ public class MainActivity extends AppCompatActivity {
     //region Audio
     private void startAudioStreaming() {
         if(!initAudio()){
+            hangUp();
             return;
         }
         isRecording.set(true);
@@ -472,7 +483,8 @@ public class MainActivity extends AppCompatActivity {
         new Thread(() -> {
             audioRecord.startRecording();
             int seqNum = 0;
-            byte[] buffer = new byte[minRecBufferSize];
+            int bufferSize = minRecBufferSize; // bigger buffer maybe (will test it)
+            byte[] buffer = new byte[bufferSize];
 
             while (isRecording.get()) {
                 int readBytes = audioRecord.read(buffer, 0, buffer.length);
@@ -579,11 +591,15 @@ public class MainActivity extends AppCompatActivity {
 
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         if (audioManager != null) {
+            System.out.println("DEBUG : Trying to reach inside");
             audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+            // Lets also set the speaker to false to avoid echo
+            audioManager.setSpeakerphoneOn(false);
         }
 
         // Lets : Enable AcousticEchoCanceler if available
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
+            System.out.println("DEBUG : I am here !!!");
             if (AcousticEchoCanceler.isAvailable()) {
                 AcousticEchoCanceler aec =
                         AcousticEchoCanceler.create(audioRecord.getAudioSessionId());
@@ -616,9 +632,6 @@ public class MainActivity extends AppCompatActivity {
 
 
         }
-
-
-
         Toast.makeText(this, "Audio Init successfully ", Toast.LENGTH_SHORT).show();
         return true;
     }
@@ -635,6 +648,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         // If user leaves the app => hang up
         hangUp();
+        closeWebSocket();
     }
 
     //region Permissions
