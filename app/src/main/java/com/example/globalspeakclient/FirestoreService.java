@@ -3,6 +3,8 @@ package com.example.globalspeakclient;
 import android.net.Uri;
 import android.util.Log;
 
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 
@@ -35,7 +37,7 @@ public class FirestoreService {
      * @param audioFile The recorded audio file to be uploaded.
      * @param callback  Callback to handle success or failure.
      */
-    public void saveUser(String userId, User user, File audioFile, FirestoreCallback callback) {
+   /* public void saveUser(String userId, User user, File audioFile, FirestoreCallback callback) {
         StorageReference audioRef = storage.getReference("user_audio/" + userId + "/" + audioFile.getName());
 
         audioRef.putFile(Uri.fromFile(audioFile))
@@ -63,7 +65,7 @@ public class FirestoreService {
                     Log.e(TAG, "Failed to upload audio file: ", e);
                     callback.onFailure(e);
                 });
-    }
+    }*/
 
     /**
      * Saves the user details along with the generated embedding in Firestore.
@@ -71,14 +73,12 @@ public class FirestoreService {
      *
      * @param userId    The unique user ID.
      * @param user      The user object containing user details.
-     * @param embedding The embedding vector received from the server.
      * @param callback  Callback to handle success or failure.
      */
-    public void saveUserWithEmbedding(String userId, User user, String embedding, FirestoreCallback callback) {
-        user.setEmbedding(embedding); // Add embedding to user object
+    public void saveUser(String userId, User user, FirestoreCallback callback) {
 
         firestore.collection("Users").document(userId)
-                .set(user) // Save user object instead of Map
+                .set(user)
                 .addOnSuccessListener(aVoid -> {
                     Log.d(TAG, "User details and embedding saved successfully for: " + userId);
                     callback.onSuccess();
@@ -89,9 +89,28 @@ public class FirestoreService {
                 });
     }
 
+    /**
+     * Fetch user details from Firestore using UID.
+     */
+    public void getUserByUid(String uid, OnUserFetchedListener listener) {
+        DocumentReference userRef = firestore.collection("Users").document(uid);
+        userRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && task.getResult().exists()) {
+                DocumentSnapshot document = task.getResult();
+                User user = document.toObject(User.class);
+                listener.onUserFetched(user);
+            } else {
+                listener.onError(task.getException());
+            }
+        });
+    }
 
     public interface FirestoreCallback {
         void onSuccess();
         void onFailure(Exception e);
+    }
+    public interface OnUserFetchedListener {
+        void onUserFetched(User user);
+        void onError(Exception e);
     }
 }

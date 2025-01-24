@@ -14,4 +14,10 @@ public class ErrorHandler {
         }
         return "An error occurred: " + (exception != null ? exception.getMessage() : "Unknown error.");
     }
+    /**
+     * Returns a general error message for Firestore failures.
+     */
+    public static String getFirestoreErrorMessage(Exception exception) {
+        return "Error retrieving user data. Please log in again.";
+    }
 }

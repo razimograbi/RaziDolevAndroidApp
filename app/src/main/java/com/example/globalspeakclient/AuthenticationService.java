@@ -47,7 +47,7 @@ public class AuthenticationService {
                 });
     }
     // signUp method
-    public void signUp(User user, File audioFile, OnAuthResultListener listener) {
+   /* public void signUp(User user, File audioFile, OnAuthResultListener listener) {
         mAuth.createUserWithEmailAndPassword(user.getEmail(), user.getPassword())
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -77,10 +77,10 @@ public class AuthenticationService {
                         listener.onFailure(task.getException()); // Handle Firebase Auth failure
                     }
                 });
-    }
+    }*/
 
-    // signUp method with embedding
-    public void signUpWithEmbedding(User user, String embedding, OnAuthResultListener listener) {
+    // signUp method
+    public void signUp(User user, OnAuthResultListener listener) {
         mAuth.createUserWithEmailAndPassword(user.getEmail(), user.getPassword())
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
@@ -90,7 +90,7 @@ public class AuthenticationService {
 
                             // Save user and embedding in Firestore
                             FirestoreService firestoreService = new FirestoreService();
-                            firestoreService.saveUserWithEmbedding(userId, user, embedding, new FirestoreService.FirestoreCallback() {
+                            firestoreService.saveUser(userId, user, new FirestoreService.FirestoreCallback() {
                                 @Override
                                 public void onSuccess() {
                                     listener.onSuccess(firebaseUser);

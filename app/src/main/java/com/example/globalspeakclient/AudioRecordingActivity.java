@@ -20,6 +20,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import okhttp3.MediaType;
@@ -28,8 +30,11 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 /**
  * This Activity is responsible for Recording user voice sample.
  * Once we submit it, user is sign up and saved in db and we move to login.
@@ -78,8 +83,7 @@ public class AudioRecordingActivity extends AppCompatActivity {
 
         btnSubmitRecording.setOnClickListener(view -> submitRecording());
 
-        requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                REQUEST_RECORD_AUDIO_PERMISSION);
+        requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_RECORD_AUDIO_PERMISSION);
 
     }
 
@@ -185,8 +189,7 @@ public class AudioRecordingActivity extends AppCompatActivity {
                 mediaPlayer.release();
                 mediaPlayer = null;
             });
-        } catch (
-                IOException e) {
+        } catch (IOException e) {
             Log.e("AudioRecording", "Error playing recording: ", e);
             Toast.makeText(this, "Failed to play recording.", Toast.LENGTH_SHORT).show();
         }
@@ -241,23 +244,31 @@ public class AudioRecordingActivity extends AppCompatActivity {
 
         // Send audio file to the server and wait for embedding
         new Thread(() -> {
-            String embeddingVector = sendAudioAndGetEmbedding(audioFile);
+            JSONObject responseJson = sendWavAndGetResponse(audioFile);
             runOnUiThread(() -> {
                 loadingProgressBar.setVisibility(View.GONE); // Hide the ProgressBar
-                if (embeddingVector != null) {
-                    User user = new User(email, password, profileName, language);
-                    authenticationService.signUpWithEmbedding(user, embeddingVector, new AuthenticationService.OnAuthResultListener() {
-                        @Override
-                        public void onSuccess(FirebaseUser user) {
-                            Toast.makeText(AudioRecordingActivity.this, "Sign-up completed!", Toast.LENGTH_SHORT).show();
-                            finish(); // Navigate to login
-                        }
+                if (responseJson != null) {
+                    try {
+                        String embedding = responseJson.getJSONArray("embedding").toString();
+                        String gptCondLatent = responseJson.getJSONArray("gpt_cond_latent").toString();
 
-                        @Override
-                        public void onFailure(Exception exception) {
-                            Toast.makeText(AudioRecordingActivity.this, "Submission failed. Please try again.", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                        User user = new User(email, password, profileName, language, embedding, gptCondLatent);
+                        authenticationService.signUp(user, new AuthenticationService.OnAuthResultListener() {
+                            @Override
+                            public void onSuccess(FirebaseUser user) {
+                                Toast.makeText(AudioRecordingActivity.this, "Sign-up completed!", Toast.LENGTH_SHORT).show();
+                                finish(); // Navigate to login
+                            }
+
+                            @Override
+                            public void onFailure(Exception exception) {
+                                Toast.makeText(AudioRecordingActivity.this, "Submission failed. Please try again.", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } catch (JSONException e) {
+                        Log.e("AudioRecordingActivity", "Error parsing JSON response", e);
+                        Toast.makeText(this, "Submission failed. Please try again.", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     Toast.makeText(this, "Submission failed. Please try again.", Toast.LENGTH_SHORT).show();
                 }
@@ -271,7 +282,7 @@ public class AudioRecordingActivity extends AppCompatActivity {
      * Uses OkHttp to perform an HTTP POST request.
      * Returns the embedding vector as a JSON-parsed string.
      */
-    private String sendAudioAndGetEmbedding(File audioFile) {
+    private JSONObject sendWavAndGetResponse(File audioFile) {
         OkHttpClient client = new OkHttpClient();
 // Creating a multipart request to send the WAV file to the server.
 // - `setType(MultipartBody.FORM)`: Specifies the request format as form-data.
@@ -279,17 +290,9 @@ public class AudioRecordingActivity extends AppCompatActivity {
 //   - The first parameter "file" is the key expected by the server.
 //   - The second parameter is the file name that will be sent.
 //   - The third parameter contains the actual file data with the MIME type "audio/wav".
-        RequestBody requestBody = new MultipartBody.Builder()
-                .setType(MultipartBody.FORM)
-                .addFormDataPart("file", audioFile.getName(),
-                        RequestBody.create(audioFile, MediaType.parse("audio/wav")))
-                .build();
+        RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM).addFormDataPart("file", audioFile.getName(), RequestBody.create(audioFile, MediaType.parse("audio/wav"))).build();
 
-        Request request = new Request.Builder()
-                // used BASE_URL from main activity need to change /process_audio
-                .url(BASE_URL + "/process_audio")
-                .post(requestBody)
-                .build();
+        Request request = new Request.Builder().url(BASE_URL + "/process_audio").post(requestBody).build();
 
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
@@ -300,18 +303,17 @@ public class AudioRecordingActivity extends AppCompatActivity {
                 Log.e("AudioRecordingActivity", "Response body is null");
                 return null;
             }
-// - Expecting the response to contain a key `"embedding"` which holds an array of embedding values.
-// - If `"embedding"` exists, convert the JSON array to a string and return it.
-// - If the key is missing, log an error and return null.
-            String responseBody = response.body().string();
-            JSONObject jsonResponse = new JSONObject(responseBody);
 
-            if (jsonResponse.has("embedding")) {
-                return jsonResponse.getJSONArray("embedding").toString(); // Convert array to string
+            JSONObject jsonResponse = new JSONObject(response.body().string());
+
+            //Ensure both `embedding` and `gpt_cond_latent` exist before returning
+            if (jsonResponse.has("embedding") && jsonResponse.has("gpt_cond_latent")) {
+                return jsonResponse;
             } else {
-                Log.e("AudioRecordingActivity", "No 'embedding' in response");
+                Log.e("AudioRecordingActivity", "Response missing required fields.");
                 return null;
             }
+
         } catch (IOException | JSONException e) {
             Log.e("AudioRecordingActivity", "Error processing response: ", e);
             return null;
@@ -340,8 +342,7 @@ public class AudioRecordingActivity extends AppCompatActivity {
      * Displays appropriate toast messages based on user permission choices.
      */
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_RECORD_AUDIO_PERMISSION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -351,5 +352,6 @@ public class AudioRecordingActivity extends AppCompatActivity {
             }
         }
     }
+
 }
 

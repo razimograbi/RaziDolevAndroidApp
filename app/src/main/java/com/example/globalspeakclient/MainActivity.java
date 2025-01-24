@@ -2,6 +2,7 @@ package com.example.globalspeakclient;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.media.audiofx.AcousticEchoCanceler;
 import android.media.audiofx.AutomaticGainControl;
 import android.media.audiofx.NoiseSuppressor;
@@ -98,6 +99,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         userId = getIntent().getStringExtra("userId");
         language = getIntent().getStringExtra("language");
+        //Get target user details (if available)
+        otherUserId = getIntent().getStringExtra("target_user_id");
+        String targetProfileName = getIntent().getStringExtra("target_profile_name");
+        String targetEmail = getIntent().getStringExtra("target_email");
         if (userId == null) {
             Toast.makeText(this, "No userId found, please go back.", Toast.LENGTH_SHORT).show();
         }
@@ -105,7 +110,14 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "No language found, please go back.", Toast.LENGTH_SHORT).show();
         }
 
-        etReceiverId = findViewById(R.id.etReceiverId);
+
+        TextView tvCallerInfo = findViewById(R.id.tvCallerInfo);
+        if (otherUserId != null) {
+            tvCallerInfo.setText("Calling: " + targetProfileName + "\n" + targetEmail);
+        } else {
+            tvCallerInfo.setText("Waiting for Call...");
+        }
+
         tvStatus = findViewById(R.id.tvStatus);
         btnCall = findViewById(R.id.btnCall);
         btnHangUp = findViewById(R.id.btnHangUp);
@@ -119,7 +131,6 @@ public class MainActivity extends AppCompatActivity {
 
         // "Call" button for outgoing calls
         btnCall.setOnClickListener(view -> {
-            otherUserId = etReceiverId.getText().toString().trim();
             if (otherUserId.isEmpty()) {
                 Toast.makeText(MainActivity.this,
                         "Enter a receiver ID",
@@ -133,6 +144,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
         btnHangUp.setOnClickListener(view -> hangUp());
+        Button btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, ConnectActivity.class);
+            startActivity(intent);
+            finish(); // Close this activity
+        });
 
         if(webSocket == null){
             connectWebSocket(userId, language);
