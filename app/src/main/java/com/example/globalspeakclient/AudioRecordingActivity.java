@@ -249,8 +249,37 @@ public class AudioRecordingActivity extends AppCompatActivity {
                 loadingProgressBar.setVisibility(View.GONE); // Hide the ProgressBar
                 if (responseJson != null) {
                     try {
-                        String embedding = responseJson.getJSONArray("embedding").toString();
-                        String gptCondLatent = responseJson.getJSONArray("gpt_cond_latent").toString();
+                        String embedding = "[]";
+                        String gptCondLatent = "[]";
+
+                        // Handle "embedding"
+                        if (responseJson.has("embedding") && !responseJson.isNull("embedding")) {
+                            Object embeddingObj = responseJson.get("embedding");
+                            if (embeddingObj instanceof String) {
+                                embedding = (String) embeddingObj;
+                            } else if (embeddingObj instanceof JSONArray) {
+                                embedding = ((JSONArray) embeddingObj).toString();
+                            } else {
+                                // Handle unexpected types
+                                throw new JSONException("Unexpected type for 'embedding'");
+                            }
+                        }
+
+                        // Handle "gpt_cond_latent"
+                        if (responseJson.has("gpt_cond_latent") && !responseJson.isNull("gpt_cond_latent")) {
+                            Object latentObj = responseJson.get("gpt_cond_latent");
+                            if (latentObj instanceof String) {
+                                gptCondLatent = (String) latentObj;
+                            } else if (latentObj instanceof JSONArray) {
+                                gptCondLatent = ((JSONArray) latentObj).toString();
+                            } else {
+                                // Handle unexpected types
+                                throw new JSONException("Unexpected type for 'gpt_cond_latent'");
+                            }
+                        }
+
+                        //String embedding = responseJson.getJSONArray("embedding").toString();
+                        //String gptCondLatent = responseJson.getJSONArray("gpt_cond_latent").toString();
 
                         User user = new User(email, password, profileName, language, embedding, gptCondLatent);
                         authenticationService.signUp(user, new AuthenticationService.OnAuthResultListener() {
