@@ -217,6 +217,10 @@ public class ConnectActivity extends AppCompatActivity {
      */
     private void logOutUser() {
         FirebaseAuth.getInstance().signOut();
+        if(webSocket != null){
+            webSocket.close(1000, "Hang Up");
+            webSocket = null;
+        }
         Intent intent = new Intent(this, LoginActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
