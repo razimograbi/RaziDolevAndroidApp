@@ -93,9 +93,8 @@
     <string name="call">Call</string>
     <string name="hang_up">Hang up</string>
     <string name="back">Back</string>
-
-
-
+    <string name="hint_add_friend">Enter friend’s email</string>
+    <string name="btn_add_friend">Add Friend</string>
 
 
 </resources>

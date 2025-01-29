@@ -5,22 +5,27 @@ package com.example.globalspeakclient;
  * Represents a user in the system.
  *
  * This class stores user details including:
- * - Email, password, profile name, preferred language, user Embedding and gptCondLatent.
- *
- * Used in authentication and Firestore storage.
+ * - Email, profile name, preferred language, user Embedding and gptCondLatent.
+ * - exclude password.
+ * Used in authentication and Firestore.
  */
-import org.json.JSONArray;
-import org.json.JSONException;
 
+
+
+import com.google.firebase.firestore.Exclude;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class User {
     private String email;
-    private String password;
     private String profileName;
     private String language;
     private String embedding;
     private String gptCondLatent;
+    private List<String> friends = new ArrayList<>();
+    @Exclude
+    private String password;
 
     public User() {
     }
@@ -83,4 +88,13 @@ public class User {
     public void setGptCondLatent(String gptCondLatent) {
         this.gptCondLatent = gptCondLatent;
     }
+
+    public List<String> getFriends() {
+        return (friends != null) ? friends : new ArrayList<>();
+    }
+
+    public void setFriends(List<String> friends) {
+        this.friends = friends;
+    }
+
 }

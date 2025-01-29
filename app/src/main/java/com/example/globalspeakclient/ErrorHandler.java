@@ -20,4 +20,11 @@ public class ErrorHandler {
     public static String getFirestoreErrorMessage(Exception exception) {
         return "Error retrieving user data. Please log in again.";
     }
+
+    /**
+     * Returns a friend list-specific error message.
+     */
+    public static String getFriendListErrorMessage(Exception exception) {
+        return "Error updating friend list. Please try again.";
+    }
 }
