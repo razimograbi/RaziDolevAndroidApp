@@ -32,6 +32,28 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="8dp"/>
 
+    <EditText
+        android:id="@+id/etFriendEmail"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:hint="@string/hint_add_friend"
+        android:inputType="textEmailAddress"
+        android:layout_marginBottom="8dp" />
+
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnAddFriend"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/btn_add_friend"
+        android:textColor="@color/white"
+        android:backgroundTint="@color/purple_500"
+        app:cornerRadius="8dp"
+        app:rippleColor="@color/purple_200"
+        android:elevation="4dp"
+        android:layout_marginTop="8dp"
+        android:padding="12dp" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewUsers"
         android:layout_width="match_parent"
@@ -52,13 +74,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/logout"
-            android:textColor="@color/white"
-            android:backgroundTint="@color/purple_500"
+            android:textColor="@color/teal_700"
+            android:backgroundTint="@color/white"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/teal_200"
             app:cornerRadius="8dp"
-            app:rippleColor="@color/purple_200"
             android:elevation="4dp"
+            app:rippleColor="@color/teal_200"
             android:layout_marginEnd="50dp"
-            android:padding="12dp"/>
+            android:padding="12dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnProceed"

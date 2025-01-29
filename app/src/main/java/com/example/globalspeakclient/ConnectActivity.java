@@ -57,6 +57,9 @@ public class ConnectActivity extends AppCompatActivity {
     private User user;
     FirestoreService firestoreService = new FirestoreService();
 
+    private EditText etFriendEmail;
+    private Button btnAddFriend;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,21 +78,123 @@ public class ConnectActivity extends AppCompatActivity {
         fetchUserDetails(uid);
         btnProceed.setOnClickListener(v -> proceedToMainActivity());
         btnRefresh.setOnClickListener(v -> {
-            fetchActiveUsers(); // Refreshes the test users for now
+            fetchActiveUsers();
         });
         // Initialize adapter
-        usersAdapter = new ActiveUsersAdapter(activeUsers, user -> {
-            if (user == null) {
-                Log.d(TAG, "No user selected. Waiting for a call.");
-                selectedUser = null;
-            } else {
-                Log.d(TAG, "Selected user: " + user.getProfileName());
-                selectedUser = user;
-            }
-        });
+        usersAdapter = new ActiveUsersAdapter(activeUsers,
+                user -> {
+                    // short press for selecting a user
+                    if (user == null) {
+                        Log.d("ConnectActivity", "No user selected. Waiting for a call.");
+                        selectedUser = null;
+                    } else {
+                        Log.d("ConnectActivity", "Selected user: " + user.getProfileName());
+                        selectedUser = user;
+                    }
+                },
+                user -> {
+                    // Long press to remove a friend
+                    if (user != null) {
+                        removeFriend(user.getEmail());
+                    }
+                }
+        );
+
         recyclerView.setAdapter(usersAdapter);
 
         recyclerView.setAdapter(usersAdapter);
+        etFriendEmail = findViewById(R.id.etFriendEmail);
+        btnAddFriend = findViewById(R.id.btnAddFriend);
+
+        btnAddFriend.setOnClickListener(view -> {
+            String friendEmail = etFriendEmail.getText().toString().trim();
+            if (!friendEmail.isEmpty()) {
+                addFriend(friendEmail);
+            } else {
+                Toast.makeText(ConnectActivity.this, "Enter a friend's email", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /**
+     * Adds a friend by email after performing necessary checks.
+     */
+    private void addFriend(String friendEmail) {
+        // Validate email format before proceeding
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(friendEmail).matches()) {
+            Toast.makeText(this, "Invalid email format!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        // Prevent adding yourself as a friend
+        if (friendEmail.equalsIgnoreCase(user.getEmail())) {  // Compare with current user's email
+            Toast.makeText(this, "You cannot add yourself as a friend!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        // Check locally if friend is already in the list
+        if (user.getFriends().contains(friendEmail)) {
+            Toast.makeText(this, "Friend already added!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Check if user exists in Firestore before adding
+        firestoreService.checkUserExists(friendEmail, new FirestoreService.OnUserCheckListener() {
+            @Override
+            public void onUserExists() {
+                // If user exists, add them to Firestore
+                user.getFriends().add(friendEmail); // Update locally first
+                firestoreService.updateFriendList(uid, user.getFriends(), new FirestoreService.FirestoreCallback() {
+                    @Override
+                    public void onSuccess() {
+                        Toast.makeText(ConnectActivity.this, "Friend added!", Toast.LENGTH_SHORT).show();
+                        etFriendEmail.setText("");
+                        fetchActiveUsers(); // Refresh UI
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        user.getFriends().remove(friendEmail); // Rollback if failure
+                        String errorMessage = ErrorHandler.getFriendListErrorMessage(e);
+                        Toast.makeText(ConnectActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onUserNotFound() {
+                Toast.makeText(ConnectActivity.this, "User not found", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                String errorMessage = ErrorHandler.getFriendListErrorMessage(e);
+                Toast.makeText(ConnectActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /**
+     * Removes a friend from the user's friend list (Triggered on long press).
+     */
+    private void removeFriend(String friendEmail) {
+
+        //  Remove friend locally first
+        user.getFriends().remove(friendEmail);
+
+        // Update Firestore
+        firestoreService.updateFriendList(uid, user.getFriends(), new FirestoreService.FirestoreCallback() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(ConnectActivity.this, "Friend removed!", Toast.LENGTH_SHORT).show();
+                fetchActiveUsers(); // Refresh UI
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                user.getFriends().add(friendEmail); // Rollback local change
+                String errorMessage = ErrorHandler.getFriendListErrorMessage(e);
+                Toast.makeText(ConnectActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void proceedToMainActivity() {
@@ -114,7 +219,7 @@ public class ConnectActivity extends AppCompatActivity {
 
 
     /**
-     * Fetch user details from Firestore.
+     * Fetches user details from Firestore
      */
     private void fetchUserDetails(String uid) {
 
@@ -127,7 +232,7 @@ public class ConnectActivity extends AppCompatActivity {
             @Override
             public void onUserFetched(User fetchedUser) {
                 if (fetchedUser != null) {
-                    user = fetchedUser;
+                    user = fetchedUser;  // Store user object
                     Log.d(TAG, "User details retrieved successfully.");
                     runOnUiThread(() -> {
                         TextView tvWelcome = findViewById(R.id.tvWelcome);
@@ -136,6 +241,7 @@ public class ConnectActivity extends AppCompatActivity {
                         }
                     });
                     connectWebSocket(user, uid); // Connect to WebSocket immediately
+                    fetchActiveUsers();
                 }
             }
 
@@ -170,7 +276,7 @@ public class ConnectActivity extends AppCompatActivity {
                     initMsg.put("gpt_cond_latent", gptCondLatentArray);
                     webSocket.send(initMsg.toString());
                     Log.d(TAG, "Sent user details to WebSocket: " + initMsg);
-                    fetchActiveUsers();
+                    fetchActiveUsers(); // Refresh UI
                 } catch (JSONException e) {
                     Log.e(TAG, "Failed to convert user embedding/gpt_cond_latent", e);
                 }
@@ -217,7 +323,7 @@ public class ConnectActivity extends AppCompatActivity {
      */
     private void logOutUser() {
         FirebaseAuth.getInstance().signOut();
-        if(webSocket != null){
+        if (webSocket != null) {
             webSocket.close(1000, "Hang Up");
             webSocket = null;
         }
@@ -229,7 +335,7 @@ public class ConnectActivity extends AppCompatActivity {
     /**
      * Fetch active users from the Python server.
      */
-    private void fetchActiveUsers() {
+   private void fetchActiveUsers() {
         String url = BASE_URL + "/active_users";
 
         Request request = new Request.Builder()
@@ -253,18 +359,30 @@ public class ConnectActivity extends AppCompatActivity {
                 try {
                     JSONArray jsonArray = new JSONArray(responseData);
                     List<ActiveUser> users = new ArrayList<>();
+                    List<String> friendEmails = user.getFriends();
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject jsonUser = jsonArray.getJSONObject(i);
-                        users.add(new ActiveUser(
-                                jsonUser.getString("user_id"),
-                                jsonUser.getString("full_name"),
-                                jsonUser.getString("email")
-                        ));
+                        String email = jsonUser.getString("email");
+                        if (friendEmails.contains(email)) {
+                            users.add(new ActiveUser(
+                                    jsonUser.getString("user_id"),
+                                    jsonUser.getString("full_name"),
+                                    email
+                            ));
+                        }
                     }
 
                     runOnUiThread(() -> {
                         activeUsers.clear();
-                        activeUsers.addAll(users);
+                        if (friendEmails.isEmpty()) {
+                            // User has no friends at all → Show "You haven't added any friends yet."
+                            activeUsers.add(new ActiveUser("", "You haven't added any friends yet.", ""));
+                        } else if (users.isEmpty()) {
+                            // Friends exist but none are online → Show "No friends are currently online."
+                            activeUsers.add(new ActiveUser("", "No friends are currently online.", ""));
+                        } else {
+                            activeUsers.addAll(users); //Show actual friends online
+                        }
                         usersAdapter.updateUserList(activeUsers);
                     });
 
@@ -274,6 +392,7 @@ public class ConnectActivity extends AppCompatActivity {
             }
         });
     }
+
 }
 
 

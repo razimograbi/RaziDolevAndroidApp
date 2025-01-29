@@ -147,6 +147,8 @@ public class MainActivity extends AppCompatActivity {
         Button btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, ConnectActivity.class);
+            intent.putExtra("uid", userId);
+
             startActivity(intent);
             finish(); // Close this activity
         });
