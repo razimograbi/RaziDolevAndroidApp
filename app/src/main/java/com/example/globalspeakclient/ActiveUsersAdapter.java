@@ -14,12 +14,24 @@ import com.example.globalspeakclient.ActiveUser;
 
 import java.util.List;
 
+
+/**
+ * Adapter for displaying a list of active users in a RecyclerView.
+ * Handles user selection and long-press actions for removing friends.
+ */
 public class ActiveUsersAdapter extends RecyclerView.Adapter<ActiveUsersAdapter.ViewHolder> {
     private List<ActiveUser> userList;
     private OnUserClickListener onUserClickListener;
     private int selectedPosition = RecyclerView.NO_POSITION; // Keeps track of selected user
     private OnUserLongPressListener onUserLongPressListener;
 
+
+    /**
+     * Constructs an adapter for active users.
+     * @param userList List of active users.
+     * @param listener Click listener for user selection.
+     * @param longPressListener Listener for long-press actions (removing friends).
+     */
     public ActiveUsersAdapter(List<ActiveUser> userList, OnUserClickListener listener, OnUserLongPressListener longPressListener) {
         this.userList = userList;
         this.onUserClickListener = listener;
@@ -27,6 +39,11 @@ public class ActiveUsersAdapter extends RecyclerView.Adapter<ActiveUsersAdapter.
 
     }
 
+
+
+    /**
+     * ViewHolder for displaying user details in a RecyclerView item.
+     */
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvUserName, tvUserEmail;
 
@@ -36,6 +53,12 @@ public class ActiveUsersAdapter extends RecyclerView.Adapter<ActiveUsersAdapter.
             tvUserEmail = itemView.findViewById(R.id.tvUserEmail);
         }
 
+
+        /**
+         * Binds user details to the UI components.
+         * @param user ActiveUser instance.
+         * @param isSelected Whether the user is currently selected.
+         */
         public void bind(ActiveUser user, boolean isSelected) {
             if (user.getEmail().isEmpty()) {
                 // This is a placeholder message, not a real user
@@ -119,6 +142,11 @@ public class ActiveUsersAdapter extends RecyclerView.Adapter<ActiveUsersAdapter.
         void onUserLongPress(ActiveUser user);
     }
 
+
+    /**
+     * Updates the list of active users in the RecyclerView.
+     * @param newList The new list of users.
+     */
     public void updateUserList(List<ActiveUser> newList) {
         userList = newList;
         notifyDataSetChanged();

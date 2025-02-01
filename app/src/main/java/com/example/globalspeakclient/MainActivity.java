@@ -21,11 +21,9 @@ import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -41,7 +39,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.WebSocket;
 import okhttp3.WebSocketListener;
-import okio.ByteString;
 
 
 import org.json.JSONException;
@@ -52,6 +49,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+
+/**
+ * Handles the main call interface for initiating and receiving calls.
+ *
+ * Features:
+ * - Initiates and manages audio streaming during calls.
+ * - Displays call status and handles incoming call requests.
+ * - Implements call control features such as accepting, rejecting, and hanging up.
+ */
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "VOIPClient";
@@ -146,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
         btnHangUp.setOnClickListener(view -> hangUp());
         Button btnBack = findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, ConnectActivity.class);
+            Intent intent = new Intent(MainActivity.this, CallDashboardActivity.class);
             intent.putExtra("uid", userId);
 
             startActivity(intent);

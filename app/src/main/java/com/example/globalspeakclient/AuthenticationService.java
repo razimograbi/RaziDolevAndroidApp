@@ -46,38 +46,6 @@ public class AuthenticationService {
                     }
                 });
     }
-    // signUp method
-   /* public void signUp(User user, File audioFile, OnAuthResultListener listener) {
-        mAuth.createUserWithEmailAndPassword(user.getEmail(), user.getPassword())
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        FirebaseUser firebaseUser = mAuth.getCurrentUser();
-                        if (firebaseUser != null) {
-                            String userId = firebaseUser.getUid();
-
-                            // Save user and audio in FirestoreService
-                            FirestoreService firestoreService = new FirestoreService();
-                            firestoreService.saveUser(userId, user, audioFile, new FirestoreService.FirestoreCallback() {
-                                @Override
-                                public void onSuccess() {
-                                    listener.onSuccess(firebaseUser); // Pass FirebaseUser on success
-                                }
-
-                                @Override
-                                public void onFailure(Exception e) {
-                                    Log.e(TAG, "Failed to save user with audio for userID: " + userId, e);
-                                    listener.onFailure(e); // Handle failure
-                                }
-                            });
-                        } else {
-                            listener.onFailure(new Exception("User creation failed: FirebaseUser is null."));
-                        }
-                    } else {
-                        Log.e(TAG, "Sign up error: ", task.getException());
-                        listener.onFailure(task.getException()); // Handle Firebase Auth failure
-                    }
-                });
-    }*/
 
     // signUp method
     public void signUp(User user, OnAuthResultListener listener) {

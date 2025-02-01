@@ -1,5 +1,6 @@
 package com.example.globalspeakclient;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -20,8 +21,6 @@ import com.google.firebase.auth.FirebaseUser;
  * This activity allows users to:
  * - Enter their email and password to sign in.
  * - Navigate to the sign-up screen if they do not have an account.
- * - Automatically log in if the user is already signed in (unless testing).
- *
  * Calls `AuthenticationService` to authenticate users with Firebase.
  */
 public class LoginActivity extends AppCompatActivity {
@@ -35,13 +34,14 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        // Check if user is already signed in (only if NOT testing)
-        boolean isTesting = true; // Set this to true during testing
+        // Show headphones requirement message
+        showHeadphonesWarning();
+        // Check if user is already signed in
+        boolean isTesting = true;
         if (!isTesting) {
             FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
             if (currentUser != null) {
-                navigateToConnectActivity(currentUser.getUid());
+                navigateToCallDashboardActivity(currentUser.getUid());
                 return;
             }
         }
@@ -50,7 +50,14 @@ public class LoginActivity extends AppCompatActivity {
         configureLoginButton();
         configureSignUpButton();
     }
-
+    private void showHeadphonesWarning() {
+        new AlertDialog.Builder(this)
+                .setTitle("Headphones Required")
+                .setMessage("This app requires headphones to function properly. Please use headphones before proceeding.")
+                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                .setCancelable(false)
+                .show();
+    }
     private void initializeUI() {
         authenticationService = new AuthenticationService();
         etUsername = findViewById(R.id.etUsername);
@@ -91,8 +98,8 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void navigateToConnectActivity(String uid) {
-        Intent intent = new Intent(LoginActivity.this, ConnectActivity.class);
+    private void navigateToCallDashboardActivity(String uid) {
+        Intent intent = new Intent(LoginActivity.this, CallDashboardActivity.class);
         intent.putExtra("uid", uid);
         startActivity(intent);
         finish();
@@ -103,7 +110,7 @@ public class LoginActivity extends AppCompatActivity {
             String uid = user.getUid(); // Get UID
             Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
 
-            navigateToConnectActivity(uid);
+            navigateToCallDashboardActivity(uid);
         }
     }
 

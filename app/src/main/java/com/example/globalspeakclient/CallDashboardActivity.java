@@ -1,21 +1,14 @@
 package com.example.globalspeakclient;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,11 +31,16 @@ import okhttp3.Call;
 import okhttp3.Callback;
 
 /**
- * This Activity is responsible for connecting the user to the WebSocket.
- * Once connected, it navigates to MainActivity.
+ * Manages the user dashboard for making and receiving calls.
+ *
+ * Features:
+ * - Connects users via WebSocket.
+ * - Displays active friends.
+ * - Allows adding and removing friends.
+ * - Navigates to MainActivity for calls.
  */
-public class ConnectActivity extends AppCompatActivity {
-    private static final String TAG = "ConnectActivity";
+public class CallDashboardActivity extends AppCompatActivity {
+    private static final String TAG = "CallDashboardActivity";
 
     private static final String BASE_URL = "http://10.0.0.16:8000";
     private static final String WS_URL = "ws://10.0.0.16:8000/ws";
@@ -63,7 +61,7 @@ public class ConnectActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_connect);
+        setContentView(R.layout.activity_call_dashboard);
         uid = getIntent().getStringExtra("uid");
         Button btnLogout = findViewById(R.id.btnLogout);
         btnLogout.setOnClickListener(v -> logOutUser());
@@ -85,10 +83,10 @@ public class ConnectActivity extends AppCompatActivity {
                 user -> {
                     // short press for selecting a user
                     if (user == null) {
-                        Log.d("ConnectActivity", "No user selected. Waiting for a call.");
+                        Log.d("CallDashboardActivity", "No user selected. Waiting for a call.");
                         selectedUser = null;
                     } else {
-                        Log.d("ConnectActivity", "Selected user: " + user.getProfileName());
+                        Log.d("CallDashboardActivity", "Selected user: " + user.getProfileName());
                         selectedUser = user;
                     }
                 },
@@ -111,7 +109,7 @@ public class ConnectActivity extends AppCompatActivity {
             if (!friendEmail.isEmpty()) {
                 addFriend(friendEmail);
             } else {
-                Toast.makeText(ConnectActivity.this, "Enter a friend's email", Toast.LENGTH_SHORT).show();
+                Toast.makeText(CallDashboardActivity.this, "Enter a friend's email", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -145,7 +143,7 @@ public class ConnectActivity extends AppCompatActivity {
                 firestoreService.updateFriendList(uid, user.getFriends(), new FirestoreService.FirestoreCallback() {
                     @Override
                     public void onSuccess() {
-                        Toast.makeText(ConnectActivity.this, "Friend added!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(CallDashboardActivity.this, "Friend added!", Toast.LENGTH_SHORT).show();
                         etFriendEmail.setText("");
                         fetchActiveUsers(); // Refresh UI
                     }
@@ -154,20 +152,20 @@ public class ConnectActivity extends AppCompatActivity {
                     public void onFailure(Exception e) {
                         user.getFriends().remove(friendEmail); // Rollback if failure
                         String errorMessage = ErrorHandler.getFriendListErrorMessage(e);
-                        Toast.makeText(ConnectActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(CallDashboardActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
                     }
                 });
             }
 
             @Override
             public void onUserNotFound() {
-                Toast.makeText(ConnectActivity.this, "User not found", Toast.LENGTH_SHORT).show();
+                Toast.makeText(CallDashboardActivity.this, "User not found", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(Exception e) {
                 String errorMessage = ErrorHandler.getFriendListErrorMessage(e);
-                Toast.makeText(ConnectActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                Toast.makeText(CallDashboardActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -184,7 +182,7 @@ public class ConnectActivity extends AppCompatActivity {
         firestoreService.updateFriendList(uid, user.getFriends(), new FirestoreService.FirestoreCallback() {
             @Override
             public void onSuccess() {
-                Toast.makeText(ConnectActivity.this, "Friend removed!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(CallDashboardActivity.this, "Friend removed!", Toast.LENGTH_SHORT).show();
                 fetchActiveUsers(); // Refresh UI
             }
 
@@ -192,13 +190,18 @@ public class ConnectActivity extends AppCompatActivity {
             public void onFailure(Exception e) {
                 user.getFriends().add(friendEmail); // Rollback local change
                 String errorMessage = ErrorHandler.getFriendListErrorMessage(e);
-                Toast.makeText(ConnectActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                Toast.makeText(CallDashboardActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+
+    /**
+     * Proceeds to MainActivity for making or receiving calls.
+     * Passes user and selected target details if applicable.
+     */
     private void proceedToMainActivity() {
-        Intent intent = new Intent(ConnectActivity.this, MainActivity.class);
+        Intent intent = new Intent(CallDashboardActivity.this, MainActivity.class);
 
         // Always pass my own details from the fetched user object
         intent.putExtra("userId", uid);
@@ -253,6 +256,10 @@ public class ConnectActivity extends AppCompatActivity {
         });
     }
 
+
+    /**
+     * Connects the user to the WebSocket server and sends user details.
+     */
     private void connectWebSocket(User user, String uid) {
         if (user == null) {
             Log.e(TAG, "Cannot connect to WebSocket: User details are null.");
@@ -292,7 +299,7 @@ public class ConnectActivity extends AppCompatActivity {
             public void onFailure(WebSocket webSocket, Throwable t, Response response) {
                 Log.e(TAG, "WebSocket Failure: " + t.getMessage());
                 runOnUiThread(() -> {
-                    Toast.makeText(ConnectActivity.this, "Connection error. Please log in again.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(CallDashboardActivity.this, "Connection error. Please log in again.", Toast.LENGTH_LONG).show();
                     logOutUser();
                 });
             }
@@ -301,7 +308,7 @@ public class ConnectActivity extends AppCompatActivity {
             public void onClosed(WebSocket webSocket, int code, String reason) {
                 Log.d(TAG, "WebSocket closed: " + reason);
                 runOnUiThread(() -> {
-                    Toast.makeText(ConnectActivity.this, "Connection closed. Please log in again.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(CallDashboardActivity.this, "Connection closed. Please log in again.", Toast.LENGTH_LONG).show();
                     logOutUser();
                 });
             }
@@ -333,7 +340,7 @@ public class ConnectActivity extends AppCompatActivity {
     }
 
     /**
-     * Fetch active users from the Python server.
+     * Fetches the list of active users from the server and updates the UI.
      */
    private void fetchActiveUsers() {
         String url = BASE_URL + "/active_users";
