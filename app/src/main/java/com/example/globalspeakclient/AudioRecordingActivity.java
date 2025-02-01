@@ -196,34 +196,6 @@ public class AudioRecordingActivity extends AppCompatActivity {
     }
 
 
-    /*private void submitRecording() {
-        if (!hasPlayedRecording) {
-            Toast.makeText(this, "Please listen to the recording before submitting.", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        File audioFile = wavRecorder.getWavFile();
-            if (audioFile == null || !audioFile.exists()) {
-                Toast.makeText(this, "No recording file found!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-        User user = new User(email, password, profileName, language);
-
-        authenticationService.signUp(user, audioFile, new AuthenticationService.OnAuthResultListener() {
-            @Override
-            public void onSuccess(FirebaseUser user) {
-                Toast.makeText(AudioRecordingActivity.this, "Sign-up completed!", Toast.LENGTH_SHORT).show();
-                finish(); // Navigate to login
-            }
-
-            @Override
-            public void onFailure(Exception exception) {
-                Toast.makeText(AudioRecordingActivity.this, "Submission failed. Please try again.", Toast.LENGTH_SHORT).show();
-
-            }
-        });
-    }
-    */
-
     /**
      * Submits the recorded audio file to the server for embedding generation.
      * After receiving the embedding, it calls AuthenticationService to sign up the user.

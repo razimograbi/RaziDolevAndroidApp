@@ -37,9 +37,9 @@
             android:name=".AudioRecordingActivity"
             android:exported="false" />
 
-        <!-- ConnectActivity -->
+        <!-- CallDashboardActivity -->
         <activity
-            android:name=".ConnectActivity"
+            android:name=".CallDashboardActivity"
             android:exported="false" />
 
         <!-- MainActivity -->
