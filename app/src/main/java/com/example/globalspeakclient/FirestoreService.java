@@ -7,7 +7,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Handles interactions with Firebase Firestore.
@@ -36,9 +38,14 @@ public class FirestoreService {
      * @param callback  Callback to handle success or failure.
      */
     public void saveUser(String userId, User user, FirestoreCallback callback) {
-
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("email", user.getEmail());
+        userData.put("profileName", user.getProfileName());
+        userData.put("language", user.getLanguage());
+        userData.put("embedding", user.getEmbedding());
+        userData.put("gptCondLatent", user.getGptCondLatent());
         firestore.collection("Users").document(userId)
-                .set(user)
+                .set(userData)
                 .addOnSuccessListener(aVoid -> {
                     Log.d(TAG, "User details and embedding saved successfully for: " + userId);
                     callback.onSuccess();

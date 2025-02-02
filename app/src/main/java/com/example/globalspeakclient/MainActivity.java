@@ -47,6 +47,7 @@ import org.json.JSONObject;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -133,7 +134,10 @@ public class MainActivity extends AppCompatActivity {
             requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, REQ_AUDIO_PERMISSION);
         }
 
-        okHttpClient = new OkHttpClient();
+        okHttpClient = new OkHttpClient.Builder()
+                .pingInterval(1, TimeUnit.MINUTES)
+                .readTimeout(2, TimeUnit.MINUTES)
+                .build();
 
         // "Call" button for outgoing calls
         btnCall.setOnClickListener(view -> {
@@ -154,7 +158,8 @@ public class MainActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, CallDashboardActivity.class);
             intent.putExtra("uid", userId);
-
+            hangUp();
+            closeWebSocket();
             startActivity(intent);
             finish(); // Close this activity
         });
@@ -338,6 +343,10 @@ public class MainActivity extends AppCompatActivity {
                         });
                         stopAudioStreaming();
                         // closeWebSocket();
+                        break;
+
+                    case "ping":
+                        Log.d(TAG, "Ping received, connection is alive");
                         break;
 
                     default:
