@@ -21,6 +21,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -71,7 +72,10 @@ public class CallDashboardActivity extends AppCompatActivity {
         // Initialize RecyclerView
         recyclerView = findViewById(R.id.recyclerViewUsers);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        okHttpClient = new OkHttpClient();
+        okHttpClient = new OkHttpClient.Builder()
+                .pingInterval(1, TimeUnit.MINUTES)
+                .readTimeout(2, TimeUnit.MINUTES)
+                .build();
         // Call method to fetch user details
         fetchUserDetails(uid);
         btnProceed.setOnClickListener(v -> proceedToMainActivity());
@@ -272,15 +276,16 @@ public class CallDashboardActivity extends AppCompatActivity {
                 Log.d(TAG, "WebSocket opened for userId: " + uid);
                 // Identify ourselves with userId
                 try {
-                    JSONArray embeddingArray = new JSONArray(user.getEmbedding());
-                    JSONArray gptCondLatentArray = new JSONArray(user.getGptCondLatent());
+                    //JSONArray embeddingArray = new JSONArray(user.getEmbedding());
+                    //JSONArray gptCondLatentArray = new JSONArray(user.getGptCondLatent());
                     JSONObject initMsg = new JSONObject();
                     initMsg.put("user_id", uid);
                     initMsg.put("language", user.getLanguage());
                     initMsg.put("profile_name", user.getProfileName());
                     initMsg.put("email", user.getEmail());
-                    initMsg.put("embedding", embeddingArray);
-                    initMsg.put("gpt_cond_latent", gptCondLatentArray);
+                    initMsg.put("embedding", user.getEmbedding());
+                    initMsg.put("gpt_cond_latent", user.getGptCondLatent());
+                    System.out.println(initMsg);
                     webSocket.send(initMsg.toString());
                     Log.d(TAG, "Sent user details to WebSocket: " + initMsg);
                     fetchActiveUsers(); // Refresh UI
