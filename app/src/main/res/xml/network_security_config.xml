@@ -259,5 +259,6 @@
         <domain includeSubdomains="true">10.10.13.251</domain>
         <domain includeSubdomains="true">10.10.13.252</domain>
         <domain includeSubdomains="true">10.10.13.253</domain>
+        <domain includeSubdomains="true">34.165.90.59</domain>
     </domain-config>
 </network-security-config>

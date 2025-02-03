@@ -43,8 +43,10 @@ import okhttp3.Callback;
 public class CallDashboardActivity extends AppCompatActivity {
     private static final String TAG = "CallDashboardActivity";
 
-    private static final String BASE_URL = "http://10.0.0.16:8000";
-    private static final String WS_URL = "ws://10.0.0.16:8000/ws";
+//    private static final String BASE_URL = "http://10.0.0.16:8000";
+//    private static final String WS_URL = "ws://10.0.0.16:8000/ws";
+    private static final String BASE_URL = "http://34.165.90.59:8000";
+    private static final String WS_URL = "ws://34.165.90.59:8000/ws";
 
     private OkHttpClient okHttpClient;
     private RecyclerView recyclerView;
