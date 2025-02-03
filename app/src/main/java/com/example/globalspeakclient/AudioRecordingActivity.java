@@ -43,7 +43,8 @@ public class AudioRecordingActivity extends AppCompatActivity {
 
     private static final int RECORDING_DURATION_MS = 8000; // 8 seconds
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
-    private static final String BASE_URL = "http://10.0.0.16:8000";
+//    private static final String BASE_URL = "http://10.0.0.16:8000";
+    private static final String BASE_URL = "http://34.165.90.59:8000";
 
     private TextView tvInstructions, tvTextToRead, tvTimer;
     private Button btnRecord, btnPlayRecording, btnSubmitRecording;

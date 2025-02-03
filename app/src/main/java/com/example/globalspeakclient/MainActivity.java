@@ -97,8 +97,12 @@ public class MainActivity extends AppCompatActivity {
     // ================= We must be careful when selecting these ==============================
     // The server IP: for emulator, 10.0.2.2
     // The server is listening on port 8000
-    private static final String BASE_URL = "http://10.0.0.16:8000";
-    private static final String WS_URL = "ws://10.0.0.16:8000/ws";
+//    private static final String BASE_URL = "http://10.0.0.16:8000";
+//    private static final String WS_URL = "ws://10.0.0.16:8000/ws";
+
+    private static final String BASE_URL = "http://34.165.90.59:8000";
+    private static final String WS_URL = "ws://34.165.90.59:8000/ws";
+
 
     // ========================================================================================
 

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1036236316847",
+    "project_id": "razidolevandroidapp",
+    "storage_bucket": "razidolevandroidapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1036236316847:android:c5abee01e086713608b45a",
+        "android_client_info": {
+          "package_name": "com.example.globalspeakclient"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_UWlgO_AwybZRZMHhvuxedoRAqAIuvRY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
