@@ -13,7 +13,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+
 import androidx.appcompat.app.AlertDialog;
+
 import android.content.pm.PackageManager;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
@@ -53,7 +55,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Handles the main call interface for initiating and receiving calls.
- *
+ * <p>
  * Features:
  * - Initiates and manages audio streaming during calls.
  * - Displays call status and handles incoming call requests.
@@ -88,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
     private String language; // We get it from Intent
     private String otherUserId;
     private String activeCallId; // store the call_id from the server
-
+    private TextView tvCallerInfo;
     // Permission code
     private static final int REQ_AUDIO_PERMISSION = 123;
 
@@ -113,14 +115,14 @@ public class MainActivity extends AppCompatActivity {
         if (userId == null) {
             Toast.makeText(this, "No userId found, please go back.", Toast.LENGTH_SHORT).show();
         }
-        if(language == null){
+        if (language == null) {
             Toast.makeText(this, "No language found, please go back.", Toast.LENGTH_SHORT).show();
         }
 
 
-        TextView tvCallerInfo = findViewById(R.id.tvCallerInfo);
+        tvCallerInfo = findViewById(R.id.tvCallerInfo);
         if (otherUserId != null) {
-            tvCallerInfo.setText("Calling: " + targetProfileName + "\n" + targetEmail);
+            tvCallerInfo.setText(targetProfileName + "\n" + targetEmail);
         } else {
             tvCallerInfo.setText("Waiting for Call...");
         }
@@ -164,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
             finish(); // Close this activity
         });
 
-        if(webSocket == null){
+        if (webSocket == null) {
             connectWebSocket(userId, language);
         }
     }
@@ -238,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     /**
-     *  Connect the WebSocket and identify ourselves with userId.
+     * Connect the WebSocket and identify ourselves with userId.
      */
     private void connectWebSocket(String userId, String language) {
         if (webSocket != null) {
@@ -373,6 +375,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         activeCallId = callId; // store it so we can reference later
+                        runOnUiThread(() -> tvCallerInfo.setText(fromUser));
                         respondToCall(callId, "accept");
                     }
                 })
@@ -506,7 +509,7 @@ public class MainActivity extends AppCompatActivity {
 
     //region Audio
     private void startAudioStreaming() {
-        if(!initAudio()){
+        if (!initAudio()) {
             hangUp();
             return;
         }
